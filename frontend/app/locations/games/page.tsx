@@ -51,7 +51,7 @@ export default function GamesLocationPage() {
       <div className="absolute bottom-[10%] left-[30%] w-36 h-36 rounded-full bg-white/10" />
 
       <div className="relative z-10 w-full max-w-lg">
-        <div className="pet-card relative overflow-hidden p-8 md:p-10 min-h-[780px] flex flex-col justify-between">
+        <div className="pet-card relative overflow-hidden p-8 md:p-10 min-h-[620px] md:min-h-[700px] flex flex-col justify-between">
           <div
             className="absolute inset-0"
             style={{

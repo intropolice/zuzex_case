@@ -66,7 +66,7 @@ export default function ClinicLocationPage() {
     >
       <div className="w-full max-w-lg">
         <div
-          className="pet-card relative overflow-hidden min-h-[780px]"
+          className="pet-card relative overflow-hidden min-h-[620px] md:min-h-[700px]"
           style={{
             backgroundImage: "url('/images/clinic_bg.png')",
             backgroundSize: 'cover',

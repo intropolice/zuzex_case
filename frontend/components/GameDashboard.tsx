@@ -1,12 +1,57 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { PetAvatar } from './PetAvatar';
 import { PetStats } from './PetStats';
 
+type WeatherResponse = {
+  city?: string;
+  weatherDescription?: string;
+  isBadWeather?: boolean;
+};
+
 export function GameDashboard() {
   const { pet } = useGame();
+  const [isBadWeather, setIsBadWeather] = useState(false);
+  const [weatherDescription, setWeatherDescription] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadWeather = async (query = '') => {
+      try {
+        const response = await fetch(`/api/weather${query}`, { cache: 'no-store' });
+        const data = (await response.json()) as WeatherResponse;
+
+        if (cancelled) return;
+
+        setIsBadWeather(Boolean(data.isBadWeather));
+        setWeatherDescription(typeof data.weatherDescription === 'string' ? data.weatherDescription : '');
+      } catch (error) {
+        console.error('Ошибка загрузки погоды:', error);
+      }
+    };
+
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          void loadWeather(`?lat=${latitude}&lon=${longitude}`);
+        },
+        () => {
+          void loadWeather();
+        },
+        { timeout: 6000 },
+      );
+    } else {
+      void loadWeather();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -29,11 +74,16 @@ export function GameDashboard() {
             <p className="text-sm md:text-base text-gray-600">
               Ухаживай за своим другом!
             </p>
+            {weatherDescription && (
+              <p className="text-xs md:text-sm mt-2 text-gray-700">
+                Погода: {weatherDescription}
+              </p>
+            )}
           </div>
 
           {/* Аватар питомца */}
           <div className="flex justify-center mb-4 min-h-[160px] items-center">
-            <PetAvatar pet={pet} />
+            <PetAvatar pet={pet} isBadWeather={isBadWeather} />
           </div>
 
           {/* Статистика */}

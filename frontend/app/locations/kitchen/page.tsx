@@ -80,7 +80,7 @@ export default function KitchenLocationPage() {
 
       <div className="relative z-10 w-full max-w-lg">
         <div
-          className="pet-card relative overflow-hidden p-8 md:p-10 min-h-[780px] flex flex-col"
+          className="pet-card relative overflow-hidden p-8 md:p-10 min-h-[620px] md:min-h-[700px] flex flex-col"
           style={{
             backgroundImage: "url('/images/kitchen.jpeg')",
             backgroundSize: 'cover',

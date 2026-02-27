@@ -7,9 +7,10 @@ import { consumeLaughAnimation } from '@/lib/pet-animation';
 
 interface PetAvatarProps {
   pet: Pet | null;
+  isBadWeather?: boolean;
 }
 
-export function PetAvatar({ pet }: PetAvatarProps) {
+export function PetAvatar({ pet, isBadWeather = false }: PetAvatarProps) {
   const [showLaughAnimation, setShowLaughAnimation] = useState(false);
 
   useEffect(() => {
@@ -33,7 +34,12 @@ export function PetAvatar({ pet }: PetAvatarProps) {
     );
   }
 
-  const conditionText = getPetConditionText(pet);
+  const isDead = pet.status.toLowerCase() === 'dead';
+  const weatherMakesSad = isBadWeather && !isDead;
+  const conditionText = weatherMakesSad ? 'Грустный из-за плохой погоды' : getPetConditionText(pet);
+  const avatarClass = weatherMakesSad
+    ? 'w-[112px] h-[112px] md:w-[128px] md:h-[128px] mx-auto mb-6 rounded-full object-cover grayscale brightness-75 transition-all duration-300 hover:scale-110 cursor-pointer drop-shadow-lg'
+    : 'w-[112px] h-[112px] md:w-[128px] md:h-[128px] mx-auto mb-6 rounded-full object-cover transition-all duration-300 hover:scale-110 cursor-pointer drop-shadow-lg';
 
   return (
     <div className="text-center">
@@ -43,14 +49,14 @@ export function PetAvatar({ pet }: PetAvatarProps) {
           autoPlay
           muted
           playsInline
-          className="w-28 h-28 md:w-32 md:h-32 mx-auto mb-6 rounded-full object-cover transition-all duration-300 hover:scale-110 cursor-pointer drop-shadow-lg"
+          className={avatarClass}
           onEnded={() => setShowLaughAnimation(false)}
         />
       ) : (
         <img
           src="/skin/image.png"
           alt={`Аватар питомца ${pet.name}`}
-          className="w-28 h-28 md:w-32 md:h-32 mx-auto mb-6 rounded-full object-cover transition-all duration-300 hover:scale-110 cursor-pointer drop-shadow-lg"
+          className={avatarClass}
         />
       )}
       <h2 className="text-3xl font-bold text-gray-800 mb-2">{pet.name}</h2>
