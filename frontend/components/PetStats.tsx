@@ -22,25 +22,25 @@ export function PetStats({ pet }: PetStatsProps) {
 
   const stats = [
     {
-      label: 'Сытость',
+      label: 'Кухня',
       value: Math.round(100 - (pet?.hunger ?? 50)),
       icon: Apple,
       href: '/locations/kitchen',
     },
     {
-      label: 'Энергия',
+      label: 'Спальня',
       value: Math.round(pet?.energy ?? 100),
       icon: Zap,
       href: '/locations/sleep',
     },
     {
-      label: 'Настроение',
+      label: 'Игровая',
       value: Math.round(pet?.mood ?? 50),
       icon: Smile,
       href: '/locations/games',
     },
     {
-      label: 'Здоровье',
+      label: 'Больница',
       value: Math.round(pet?.health ?? 100),
       icon: HeartPulse,
       href: '/locations/clinic',

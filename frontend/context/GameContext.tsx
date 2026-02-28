@@ -9,7 +9,7 @@ interface GameContextType {
   loading: boolean;
   error: string | null;
   petInitialized: boolean;
-  initializePet: (name: string) => Promise<void>;
+  initializePet: (name: string) => Promise<Pet>;
   refreshPet: () => Promise<void>;
   updatePet: (pet: Pet) => void;
 }
@@ -28,7 +28,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return !candidate.error && typeof candidate.id === 'string' && typeof candidate.name === 'string';
   };
 
-  const initializePet = async (name: string) => {
+  const initializePet = async (name: string): Promise<Pet> => {
     setLoading(true);
     setError(null);
     try {
@@ -47,9 +47,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (isValidPetResponse(latestPet)) {
         setPet(latestPet);
         setPetInitialized(true);
+        return latestPet;
       }
 
       console.log('[GameContext] Pet initialized successfully');
+      return newPet;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Ошибка при создании питомца';
       setError(message);

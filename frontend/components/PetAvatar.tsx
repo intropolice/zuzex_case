@@ -4,6 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { Pet } from '@/types';
 import { getPetConditionText } from '@/lib/utils';
 import { consumeLaughAnimation } from '@/lib/pet-animation';
+import { CharacterSkin, getCharacterImageForPet, getCharacterSkinForPet } from '@/lib/character-skin';
+
+const CHARACTER1_SLEEP_ANIMATION = '/e2e5f706-5e6a-4fe1-8b8f-3aa7650d45cb_GStory_1772248737544.mov';
+const CHARACTER1_SAD_ANIMATION = '/5a185663_0e13_49d5_982b_1b6703579929_u1_f75f7c75_0d48_454a_a9e2.mov';
+const CHARACTER2_SAD_ANIMATION = '/a11577aa-cd9c-4e69-98d1-e7bad85bd283_1772236660743_GStory_1772236909250.mov';
+const CHARACTER2_JOY_ANIMATION = '/462166fe-b6d8-4131-9f1b-3bfd97faa473_1772233388314_GStory_1772233718306.mov';
+const CHARACTER2_EAT_ANIMATION = '/2dd6633a-688d-47dd-961a-8e27f62e9d62_1772233986327_GStory_1772234385171.mov';
 
 interface PetAvatarProps {
   pet: Pet | null;
@@ -23,12 +30,14 @@ export function PetAvatar({
   const [showAnimation, setShowAnimation] = useState(false);
   const [currentAnimationSrc, setCurrentAnimationSrc] = useState<'laugh' | string>('laugh');
   const [animationVersion, setAnimationVersion] = useState(0);
+  const [characterImage, setCharacterImage] = useState(() => getCharacterImageForPet(pet?.id));
+  const [characterSkin, setCharacterSkin] = useState<CharacterSkin>(() => getCharacterSkinForPet(pet?.id));
 
   useEffect(() => {
     const remainingMs = consumeLaughAnimation();
     if (remainingMs <= 0) return;
 
-    setCurrentAnimationSrc('laugh');
+    setCurrentAnimationSrc(characterSkin === 'variant2' ? CHARACTER2_JOY_ANIMATION : 'laugh');
     setShowAnimation(true);
     setAnimationVersion((prev) => prev + 1);
     const timer = window.setTimeout(() => {
@@ -36,12 +45,23 @@ export function PetAvatar({
     }, remainingMs);
 
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [characterSkin]);
 
   useEffect(() => {
     if (!externalAnimationSrc || !externalAnimationKey) return;
 
-    setCurrentAnimationSrc(externalAnimationSrc);
+    const isSleepAnimation = externalAnimationSrc.endsWith('/sleep.mov') || externalAnimationSrc.endsWith('/sleep.mp4');
+    const isEatingAnimation = externalAnimationSrc.endsWith('/eating.mov') || externalAnimationSrc.endsWith('/eating.mp4');
+    const resolvedAnimationSrc =
+      characterSkin === 'default' && isSleepAnimation
+        ? CHARACTER1_SLEEP_ANIMATION
+        : characterSkin === 'variant2' && isEatingAnimation
+          ? CHARACTER2_EAT_ANIMATION
+          : characterSkin === 'variant2' && isSleepAnimation
+            ? CHARACTER2_JOY_ANIMATION
+            : externalAnimationSrc;
+
+    setCurrentAnimationSrc(resolvedAnimationSrc);
     setShowAnimation(true);
     setAnimationVersion((prev) => prev + 1);
 
@@ -50,7 +70,12 @@ export function PetAvatar({
     }, 8000);
 
     return () => window.clearTimeout(fallbackTimer);
-  }, [externalAnimationSrc, externalAnimationKey]);
+  }, [characterSkin, externalAnimationKey, externalAnimationSrc]);
+
+  useEffect(() => {
+    setCharacterImage(getCharacterImageForPet(pet?.id));
+    setCharacterSkin(getCharacterSkinForPet(pet?.id));
+  }, [pet?.id]);
 
   if (!pet) {
     return (
@@ -63,6 +88,11 @@ export function PetAvatar({
 
   const isDead = pet.status.toLowerCase() === 'dead';
   const weatherMakesSad = isBadWeather && !isDead;
+  const isHungry = pet.hunger < 35;
+  const isLowEnergy = pet.energy < 35;
+  const isSick = pet.status.toLowerCase() === 'sick' || pet.health < 40;
+  const shouldShowNeedsSadAnimation = !showAnimation && !isDead && (isHungry || isLowEnergy || isSick);
+  const sadAnimationSrc = characterSkin === 'variant2' ? CHARACTER2_SAD_ANIMATION : CHARACTER1_SAD_ANIMATION;
   const conditionText = weatherMakesSad ? 'Грустный из-за плохой погоды' : getPetConditionText(pet);
   const avatarSizeClass = 'w-[clamp(220px,50vh,520px)] h-[clamp(220px,50vh,520px)]';
   const avatarClass = weatherMakesSad
@@ -73,6 +103,13 @@ export function PetAvatar({
     <div className="text-center">
       {showMeta && <h2 className="-mt-10 md:-mt-14 mb-2 text-3xl font-bold text-gray-800">{pet.name}</h2>}
       <div className="relative inline-block">
+        <video className="hidden" preload="auto" muted playsInline aria-hidden="true">
+          <source src={CHARACTER1_SLEEP_ANIMATION} type="video/quicktime" />
+          <source src={CHARACTER1_SAD_ANIMATION} type="video/quicktime" />
+          <source src={CHARACTER2_SAD_ANIMATION} type="video/quicktime" />
+          <source src={CHARACTER2_JOY_ANIMATION} type="video/quicktime" />
+          <source src={CHARACTER2_EAT_ANIMATION} type="video/quicktime" />
+        </video>
         {showAnimation ? (
           <video
             key={animationVersion}
@@ -80,7 +117,7 @@ export function PetAvatar({
             muted
             playsInline
             preload="auto"
-            poster="/skin/image.png"
+            poster={characterImage}
             className={avatarClass}
             onEnded={() => setShowAnimation(false)}
           >
@@ -96,9 +133,21 @@ export function PetAvatar({
               />
             )}
           </video>
+        ) : shouldShowNeedsSadAnimation ? (
+          <video
+            autoPlay
+            muted
+            playsInline
+            loop
+            preload="auto"
+            poster={characterImage}
+            className={avatarClass}
+          >
+            <source src={sadAnimationSrc} type="video/quicktime" />
+          </video>
         ) : (
           <img
-            src="/skin/image.png"
+            src={characterImage}
             alt={`Аватар питомца ${pet.name}`}
             className={avatarClass}
           />

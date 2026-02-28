@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
+import { CharacterSkin, saveCharacterSkin } from '@/lib/character-skin';
 
 interface PetCreationFormProps {
   onCreated: () => void;
@@ -9,6 +10,7 @@ interface PetCreationFormProps {
 
 export function PetCreationForm({ onCreated }: PetCreationFormProps) {
   const [petName, setPetName] = useState('');
+  const [selectedSkin, setSelectedSkin] = useState<CharacterSkin>('default');
   const [loading, setLoading] = useState(false);
   const { initializePet, error } = useGame();
 
@@ -18,7 +20,8 @@ export function PetCreationForm({ onCreated }: PetCreationFormProps) {
 
     setLoading(true);
     try {
-      await initializePet(petName);
+      const createdPet = await initializePet(petName);
+      saveCharacterSkin(createdPet.id, selectedSkin);
       onCreated();
     } catch (error) {
       console.error('Ошибка при создании питомца:', error);
@@ -67,6 +70,39 @@ export function PetCreationForm({ onCreated }: PetCreationFormProps) {
                 className="w-full px-4 py-3 rounded-lg border-2 border-purple-300 focus:border-purple-600 focus:outline-none transition-colors text-gray-800"
                 disabled={loading}
               />
+            </div>
+
+            <div>
+              <p className="block text-sm font-semibold text-gray-800 mb-2">Выбор персонажа</p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSkin('default')}
+                  className={`rounded-xl border-2 p-2 transition-colors ${selectedSkin === 'default' ? 'border-purple-600' : 'border-purple-300'}`}
+                  disabled={loading}
+                >
+                  <img
+                    src="/skin/image.png"
+                    alt="Персонаж 1"
+                    className="w-full h-24 object-contain rounded-lg bg-white"
+                  />
+                  <span className="mt-1 block text-xs font-semibold text-gray-700">Персонаж 1</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedSkin('variant2')}
+                  className={`rounded-xl border-2 p-2 transition-colors ${selectedSkin === 'variant2' ? 'border-purple-600' : 'border-purple-300'}`}
+                  disabled={loading}
+                >
+                  <img
+                    src="/images/Image-2.png"
+                    alt="Персонаж 2"
+                    className="w-full h-24 object-contain rounded-lg bg-white"
+                  />
+                  <span className="mt-1 block text-xs font-semibold text-gray-700">Персонаж 2</span>
+                </button>
+              </div>
             </div>
 
             <button

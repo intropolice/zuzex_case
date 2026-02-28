@@ -2,42 +2,23 @@
 
 import Link from 'next/link';
 import { Home } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { petAPI } from '@/lib/api';
-import { LocationPetDisplay } from '@/components/LocationPetDisplay';
 import { GlobalCoinsOverlay } from '@/components/GlobalCoinsOverlay';
 
 export default function GamesLocationPage() {
-  const [progress, setProgress] = useState(50);
-
-  const routeButtons = [
-    { label: 'Google Dinosaur', href: '/locations/games/game1' },
-    { label: 'FlappyBird', href: '/locations/games/game2' },
-    { label: 'Tetris', href: '/locations/games/game3' },
+  const rooms = [
+    {
+      label: 'Комната 1',
+      subtitle: 'Классическая',
+      href: '/locations/games/room1',
+      preview: "url('/images/5323314.jpg')",
+    },
+    {
+      label: 'Комната 2',
+      subtitle: 'Неоновая',
+      href: '/locations/games/room2',
+      preview: "url('/images/5241342_preview.jpg')",
+    },
   ];
-
-  useEffect(() => {
-    let mounted = true;
-
-    const syncMood = async () => {
-      try {
-        const pet = await petAPI.getPet();
-        if (mounted) {
-          const moodValue = Math.round(pet?.mood ?? 50);
-          setProgress(Math.max(0, Math.min(100, moodValue)));
-        }
-      } catch (error) {
-        console.error('Ошибка синхронизации настроения:', error);
-      }
-    };
-
-    syncMood();
-    const interval = setInterval(syncMood, 15000);
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
-  }, []);
 
   return (
     <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -53,17 +34,8 @@ export default function GamesLocationPage() {
       <div className="absolute bottom-[10%] left-[30%] w-36 h-36 rounded-full bg-white/10" />
 
       <div className="relative z-10 w-full max-w-lg">
-        <div className="pet-card relative overflow-hidden p-8 md:p-10 min-h-[620px] md:min-h-[700px] flex flex-col justify-between">
+        <div className="pet-card relative overflow-hidden p-8 md:p-10 min-h-[620px] md:min-h-[700px] flex flex-col">
           <GlobalCoinsOverlay />
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: "url('/images/5323314.jpg')",
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-          />
 
           <Link
             href="/"
@@ -74,42 +46,31 @@ export default function GamesLocationPage() {
             <Home size={20} />
           </Link>
 
-          <div className="relative z-10 pt-4">
-            <h1 className="text-4xl md:text-5xl font-black text-fuchsia-200 text-center tracking-wide mb-8 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
-              Игровая Комната
+          <div className="relative z-10 pt-16">
+            <h1 className="text-4xl md:text-5xl font-black text-fuchsia-200 text-center tracking-wide mb-6 drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
+              Выбор Комнаты
             </h1>
-
-            <div className="bg-gray-200 rounded-full p-2">
-              <div className="h-4 rounded-full bg-gray-300 overflow-hidden">
-                <div
-                  className="h-full transition-all duration-500"
-                  style={{
-                    width: `${progress}%`,
-                    background: 'linear-gradient(90deg, #f0abfc 0%, #ec4899 45%, #c026d3 100%)',
-                  }}
-                />
-              </div>
-            </div>
-            <p className="text-cyan-200 text-sm mt-2 text-center drop-shadow-[0_1px_4px_rgba(0,0,0,0.75)]">Настроение: {progress}%</p>
           </div>
 
-          <div className="relative z-10 space-y-4 pb-2">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-3">
-              {routeButtons.map((btn) => (
-                <Link
-                  key={btn.label}
-                  href={btn.href}
-                  className="liquid-glass-btn relative overflow-hidden text-center rounded-2xl px-5 py-3 font-bold text-white border border-white/40 bg-white/15 backdrop-blur-xl shadow-[0_8px_30px_rgba(236,72,153,0.28),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/25 hover:border-white/60 transition-all duration-300"
-                >
-                  <span className="pointer-events-none absolute inset-x-4 top-1 h-4 rounded-full bg-white/35 blur-sm" />
-                  {btn.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="absolute inset-x-0 bottom-0 z-0 flex justify-center pointer-events-none">
-            <LocationPetDisplay />
+          <div className="relative z-10 mt-2 grid grid-cols-1 gap-4">
+            {rooms.map((room) => (
+              <Link
+                key={room.label}
+                href={room.href}
+                className="relative overflow-hidden rounded-2xl border border-white/35 min-h-[150px] p-4 flex flex-col justify-end shadow-[0_12px_28px_rgba(0,0,0,0.28)]"
+                style={{
+                  backgroundImage: `${room.preview}, linear-gradient(135deg, #312e81 0%, #7e22ce 100%)`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              >
+                <div className="absolute inset-0 bg-black/25" />
+                <div className="relative z-10">
+                  <div className="text-white text-2xl font-extrabold drop-shadow">{room.label}</div>
+                  <div className="text-white/90 text-sm font-semibold mt-1">{room.subtitle}</div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
