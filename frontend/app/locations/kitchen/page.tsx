@@ -5,10 +5,15 @@ import { useEffect, useRef, useState } from 'react';
 import { Home } from 'lucide-react';
 import { petAPI } from '@/lib/api';
 import { triggerLaughAnimation } from '@/lib/pet-animation';
+import { LocationPetDisplay } from '@/components/LocationPetDisplay';
+import { GlobalCoinsOverlay } from '@/components/GlobalCoinsOverlay';
+import { consumeFoodItem, getFoodInventory, subscribeFoodInventory, FoodId } from '@/lib/food-inventory';
 
 export default function KitchenLocationPage() {
   const [satiety, setSatiety] = useState(50);
   const [loading, setLoading] = useState(false);
+  const [eatingAnimationKey, setEatingAnimationKey] = useState(0);
+  const [inventory, setInventory] = useState(getFoodInventory());
   const requestVersionRef = useRef(0);
 
   const loadPet = async () => {
@@ -42,7 +47,12 @@ export default function KitchenLocationPage() {
     };
   }, []);
 
-  const feedBy = async (amount: number) => {
+  useEffect(() => subscribeFoodInventory(setInventory), []);
+
+  const feedBy = async (foodId: FoodId, amount: number) => {
+    if (loading || inventory[foodId] <= 0) return;
+
+    setEatingAnimationKey((prev) => prev + 1);
     setLoading(true);
     const previousSatiety = satiety;
     try {
@@ -56,6 +66,7 @@ export default function KitchenLocationPage() {
       } else {
         await loadPet();
       }
+      consumeFoodItem(foodId, 1);
     } catch (error) {
       console.error('Ошибка кормления питомца:', error);
     } finally {
@@ -64,9 +75,9 @@ export default function KitchenLocationPage() {
   };
 
   const foods = [
-    { emoji: '🍎', label: 'Яблоко', amount: 20 },
-    { emoji: '🍰', label: 'Торт', amount: 40 },
-    { emoji: '🥩', label: 'Стейк', amount: 60 },
+    { id: 'apple' as FoodId, emoji: '🍎', label: 'Яблоко', amount: 20 },
+    { id: 'cake' as FoodId, emoji: '🍰', label: 'Торт', amount: 40 },
+    { id: 'steak' as FoodId, emoji: '🥩', label: 'Стейк', amount: 60 },
   ];
 
   return (
@@ -77,6 +88,16 @@ export default function KitchenLocationPage() {
         <div></div>
         <div></div>
       </div>
+      <video
+        className="hidden"
+        preload="auto"
+        muted
+        playsInline
+        aria-hidden="true"
+      >
+        <source src="/eating.mov" type="video/quicktime" />
+        <source src="/eating.mp4" type="video/mp4" />
+      </video>
 
       <div className="relative z-10 w-full max-w-lg">
         <div
@@ -88,9 +109,10 @@ export default function KitchenLocationPage() {
             backgroundRepeat: 'no-repeat',
           }}
         >
+          <GlobalCoinsOverlay />
           <Link
             href="/"
-            className="absolute top-4 left-4 z-20 inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 border border-white/40 text-white hover:bg-white/30 transition-colors"
+            className="liquid-glass-btn absolute top-4 left-4 z-20 inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 border border-white/40 text-white hover:bg-white/30 transition-colors"
             aria-label="На главную"
             title="На главную"
           >
@@ -117,17 +139,29 @@ export default function KitchenLocationPage() {
           <div className="mt-auto relative z-10 grid grid-cols-3 gap-3">
             {foods.map((food) => (
               <button
-                key={food.label}
+                key={food.id}
                 type="button"
-                onClick={() => feedBy(food.amount)}
-                disabled={loading}
-                className="rounded-xl px-3 py-3 bg-black/45 border border-white/25 text-white font-semibold hover:bg-black/60 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                onClick={() => feedBy(food.id, food.amount)}
+                disabled={loading || inventory[food.id] <= 0}
+                className={`rounded-xl px-3 py-3 border text-white font-semibold disabled:cursor-not-allowed transition-colors ${
+                  inventory[food.id] > 0
+                    ? 'bg-black/45 border-white/25 hover:bg-black/60'
+                    : 'bg-gray-500/45 border-gray-300/30 grayscale opacity-70'
+                }`}
               >
                 <div className="text-2xl">{food.emoji}</div>
                 <div className="text-sm mt-1">{food.label}</div>
                 <div className="text-xs text-emerald-200">+{food.amount}</div>
+                <div className="text-xs mt-1 text-white/90">x{inventory[food.id]}</div>
               </button>
             ))}
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 z-0 flex justify-center pointer-events-none">
+            <LocationPetDisplay
+              externalAnimationSrc="/eating.mov"
+              externalAnimationKey={eatingAnimationKey}
+            />
           </div>
         </div>
       </div>

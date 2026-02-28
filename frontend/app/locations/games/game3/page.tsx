@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Home } from 'lucide-react';
 import { petAPI } from '@/lib/api';
+import { addGameCoins } from '@/lib/game-coins';
+import { GameCoinsBar } from '@/components/GameCoinsBar';
 
 type Cell = number;
 type Matrix = Cell[][];
@@ -113,6 +115,7 @@ export default function Game3Page() {
         }
       }
       if (cleared > 0) {
+        addGameCoins(cleared * 5);
         totalLines += cleared;
         const nextLevel = 1 + Math.floor(totalLines / 4);
         dropDelay = Math.max(120, 560 - nextLevel * 45);
@@ -166,6 +169,11 @@ export default function Game3Page() {
     const drawBlock = (x: number, y: number, color: string) => {
       ctx.fillStyle = color;
       ctx.fillRect(x * BLOCK, y * BLOCK, BLOCK - 1, BLOCK - 1);
+      ctx.strokeStyle = '#111827';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(x * BLOCK + 0.5, y * BLOCK + 0.5, BLOCK - 2, BLOCK - 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.22)';
+      ctx.fillRect(x * BLOCK + 3, y * BLOCK + 3, BLOCK - 12, BLOCK - 12);
     };
 
     const render = (ts: number) => {
@@ -219,16 +227,28 @@ export default function Game3Page() {
     <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <div className="floating-shapes"><div></div><div></div><div></div><div></div></div>
       <div className="relative z-10 w-full max-w-5xl">
-        <div className="pet-card p-6 md:p-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="pet-card relative overflow-hidden p-6 md:p-8">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/images/main_bg1.jpg')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+          <div className="relative z-10 flex items-center justify-between mb-4">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Tetris (TS)</h1>
-            <Link href="/locations/games" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-              <Home size={16} />
-              Назад
-            </Link>
+            <div className="flex items-center gap-2">
+              <GameCoinsBar />
+              <Link href="/locations/games" className="liquid-glass-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/45 bg-white/16 text-white backdrop-blur-xl shadow-[0_10px_26px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/26 transition-all duration-300">
+                  <Home size={16} />
+                  Назад
+              </Link>
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-[auto,1fr] gap-6 items-start">
+          <div className="relative z-10 grid md:grid-cols-[auto,1fr] gap-6 items-start">
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="rounded-xl border border-gray-300 bg-black" />
             <div className="space-y-4">
               <div className="rounded-xl bg-black/85 border border-white/20 px-4 py-3 text-white">
@@ -255,7 +275,7 @@ export default function Game3Page() {
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="mt-4 inline-flex px-5 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                  className="mt-4 inline-flex px-5 py-3 rounded-xl border border-white/45 bg-white/16 text-white font-semibold backdrop-blur-xl shadow-[0_10px_26px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/26 transition-all duration-300"
                 >
                   Попробовать еще раз
                 </button>

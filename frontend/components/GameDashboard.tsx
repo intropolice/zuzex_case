@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { PetAvatar } from './PetAvatar';
 import { PetStats } from './PetStats';
+import { GlobalCoinsOverlay } from './GlobalCoinsOverlay';
 
 type WeatherResponse = {
   city?: string;
@@ -65,9 +66,10 @@ export function GameDashboard() {
 
       {/* Контент */}
       <div className="relative z-10 w-full max-w-lg">
-        <div className="pet-card p-8 md:p-10 animate-float flex flex-col min-h-[620px] md:min-h-[700px]">
+        <div className="pet-card relative overflow-hidden p-8 md:p-10 animate-float flex flex-col min-h-[620px] md:min-h-[700px]">
+          <GlobalCoinsOverlay className="z-10" />
           {/* Заголовок */}
-          <div className="text-center mb-8">
+          <div className="relative z-20 text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-extrabold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
               🐾 Цифровой Питомец 🐾
             </h1>
@@ -81,14 +83,14 @@ export function GameDashboard() {
             )}
           </div>
 
-          {/* Аватар питомца */}
-          <div className="flex justify-center mb-4 min-h-[160px] items-center">
-            <PetAvatar pet={pet} isBadWeather={isBadWeather} />
+          {/* Кнопки справа от персонажа */}
+          <div className="absolute top-1/2 right-4 -translate-y-1/2 z-20">
+            <PetStats pet={pet} />
           </div>
 
-          {/* Статистика */}
-          <div className="mt-auto mb-0">
-            <PetStats pet={pet} />
+          {/* Аватар питомца снизу, чтобы не перекрывать кнопки */}
+          <div className="relative z-10 mt-auto flex justify-center items-end min-h-[46vh] pt-4">
+            <PetAvatar pet={pet} isBadWeather={isBadWeather} />
           </div>
 
         </div>

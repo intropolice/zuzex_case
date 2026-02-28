@@ -5,10 +5,15 @@ import { Home, Moon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { petAPI } from '@/lib/api';
 import { triggerLaughAnimation } from '@/lib/pet-animation';
+import { LocationPetDisplay } from '@/components/LocationPetDisplay';
+import { GlobalCoinsOverlay } from '@/components/GlobalCoinsOverlay';
 
 export default function SleepLocationPage() {
   const [energy, setEnergy] = useState(100);
   const [loading, setLoading] = useState(false);
+  const [sleepAnimationKey, setSleepAnimationKey] = useState(0);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [cooldownLeft, setCooldownLeft] = useState(0);
 
   const tiredness = Math.max(0, Math.min(100, energy));
 
@@ -41,7 +46,29 @@ export default function SleepLocationPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (cooldownUntil <= 0) return;
+
+    const updateCooldown = () => {
+      const remainingMs = cooldownUntil - Date.now();
+      if (remainingMs <= 0) {
+        setCooldownLeft(0);
+        setCooldownUntil(0);
+        return;
+      }
+      setCooldownLeft(Math.ceil(remainingMs / 1000));
+    };
+
+    updateCooldown();
+    const interval = window.setInterval(updateCooldown, 200);
+
+    return () => window.clearInterval(interval);
+  }, [cooldownUntil]);
+
   const handleSleep = async () => {
+    if (loading || cooldownLeft > 0) return;
+
+    setSleepAnimationKey((prev) => prev + 1);
     setLoading(true);
     const previousEnergy = energy;
     try {
@@ -55,6 +82,7 @@ export default function SleepLocationPage() {
       console.error('Ошибка сна питомца:', error);
     } finally {
       setLoading(false);
+      setCooldownUntil(Date.now() + 5000);
     }
   };
 
@@ -66,6 +94,16 @@ export default function SleepLocationPage() {
         <div></div>
         <div></div>
       </div>
+      <video
+        className="hidden"
+        preload="auto"
+        muted
+        playsInline
+        aria-hidden="true"
+      >
+        <source src="/sleep.mov" type="video/quicktime" />
+        <source src="/sleep.mp4" type="video/mp4" />
+      </video>
 
       <div className="relative z-10 w-full max-w-lg">
         <div
@@ -77,9 +115,10 @@ export default function SleepLocationPage() {
             backgroundRepeat: 'no-repeat',
           }}
         >
+          <GlobalCoinsOverlay />
           <Link
             href="/"
-            className="absolute top-4 left-4 z-20 inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 border border-white/40 text-white hover:bg-white/30 transition-colors"
+            className="liquid-glass-btn absolute top-4 left-4 z-20 inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/20 border border-white/40 text-white hover:bg-white/30 transition-colors"
             aria-label="На главную"
             title="На главную"
           >
@@ -106,12 +145,19 @@ export default function SleepLocationPage() {
             <button
               type="button"
               onClick={handleSleep}
-              disabled={loading}
+              disabled={loading || cooldownLeft > 0}
               className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
               <Moon size={18} />
-              {loading ? 'Сплю...' : 'Спать'}
+              {loading ? 'Сплю...' : cooldownLeft > 0 ? `Кулдаун: ${cooldownLeft}с` : 'Спать'}
             </button>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 z-0 flex justify-center pointer-events-none">
+            <LocationPetDisplay
+              externalAnimationSrc="/sleep.mov"
+              externalAnimationKey={sleepAnimationKey}
+            />
           </div>
         </div>
       </div>

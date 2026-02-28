@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Home } from 'lucide-react';
 import { petAPI } from '@/lib/api';
+import { addGameCoins } from '@/lib/game-coins';
+import { GameCoinsBar } from '@/components/GameCoinsBar';
 
 type Pipe = { x: number; topH: number; passed: boolean };
 
@@ -85,10 +87,18 @@ export default function Game2Page() {
         const bottomY = pipe.topH + GAP;
         ctx.fillRect(pipe.x, 0, 62, pipe.topH);
         ctx.fillRect(pipe.x, bottomY, 62, HEIGHT - bottomY);
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(pipe.x - 4, pipe.topH - 14, 70, 14); // top cap
+        ctx.fillRect(pipe.x - 4, bottomY, 70, 14); // bottom cap
+        ctx.fillStyle = '#14532d';
+        ctx.fillRect(pipe.x + 46, 0, 8, pipe.topH);
+        ctx.fillRect(pipe.x + 46, bottomY, 8, HEIGHT - bottomY);
+        ctx.fillStyle = '#16a34a';
 
         if (!pipe.passed && pipe.x + 62 < bird.x - bird.r) {
           pipe.passed = true;
           points += 1;
+          addGameCoins(2);
           setScore(points);
         }
 
@@ -115,10 +125,19 @@ export default function Game2Page() {
         void rewardPet();
       }
 
-      ctx.fillStyle = '#f59e0b';
+      // Primitive bird model (diamond + wing + eye)
+      ctx.fillStyle = '#f97316';
       ctx.beginPath();
-      ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2);
+      ctx.moveTo(bird.x, bird.y - bird.r);
+      ctx.lineTo(bird.x + bird.r + 2, bird.y);
+      ctx.lineTo(bird.x, bird.y + bird.r);
+      ctx.lineTo(bird.x - bird.r - 2, bird.y);
+      ctx.closePath();
       ctx.fill();
+      ctx.fillStyle = '#fb923c';
+      ctx.fillRect(bird.x - 2, bird.y - 6, 10, 10); // wing
+      ctx.fillStyle = '#111827';
+      ctx.fillRect(bird.x + 3, bird.y - 8, 3, 3); // eye
 
       ctx.fillStyle = '#0f172a';
       ctx.font = 'bold 22px sans-serif';
@@ -148,35 +167,47 @@ export default function Game2Page() {
     <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <div className="floating-shapes"><div></div><div></div><div></div><div></div></div>
       <div className="relative z-10 w-full max-w-4xl">
-        <div className="pet-card p-6 md:p-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="pet-card relative overflow-hidden p-6 md:p-8">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/images/main_bg1.jpg')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+          <div className="relative z-10 flex items-center justify-between mb-4">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Flappy Bird (TS)</h1>
-            <Link href="/locations/games" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-              <Home size={16} />
-              Назад
-            </Link>
+            <div className="flex items-center gap-2">
+              <GameCoinsBar />
+              <Link href="/locations/games" className="liquid-glass-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/45 bg-white/16 text-white backdrop-blur-xl shadow-[0_10px_26px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/26 transition-all duration-300">
+                  <Home size={16} />
+                  Назад
+              </Link>
+            </div>
           </div>
-          <div className="mb-4 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
+          <div className="relative z-10 mb-4 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
             <p className="text-white text-sm md:text-base">
               Правила: управляй птицей пробелом/стрелкой вверх или кликом, пролетай между трубами
               и набирай как можно больше очков.
             </p>
           </div>
-          <div className="relative">
+          <div className="relative z-10">
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="w-full rounded-xl bg-white border border-gray-300" />
             {!running && (
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-6">
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="inline-flex px-5 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                  className="inline-flex px-5 py-3 rounded-xl border border-white/45 bg-white/16 text-white font-semibold backdrop-blur-xl shadow-[0_10px_26px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/26 transition-all duration-300"
                 >
                   Попробовать еще раз
                 </button>
               </div>
             )}
           </div>
-          <div className="mt-3 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
+          <div className="relative z-10 mt-3 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
             <p className="text-white font-semibold">Счёт: {score} {running ? '' : '(попытка завершена)'}</p>
           </div>
         </div>

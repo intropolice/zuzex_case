@@ -27,6 +27,43 @@ body {
   position: relative;
 }
 
+button,
+.liquid-glass-btn {
+  border: 1px solid rgba(255, 255, 255, 0.42) !important;
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    0 10px 26px rgba(59, 130, 246, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.44);
+  transition: all 0.28s ease;
+}
+
+button:hover:not(:disabled),
+.liquid-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.26) !important;
+  border-color: rgba(255, 255, 255, 0.58) !important;
+}
+
+button:disabled {
+  opacity: 0.6;
+}
+
+button.main-menu-stat-btn {
+  border: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+button.main-menu-stat-btn:hover:not(:disabled) {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
 /* Плавающие фигуры */
 @keyframes float-shapes {
   0%, 100% {
@@ -124,6 +161,25 @@ body {
   color: #374151;
   font-weight: 600;
   font-size: 1.125rem;
+}
+
+.pet-status-bubble {
+  position: absolute;
+  top: 8%;
+  right: calc(-18% + 70px);
+  z-index: 12;
+}
+
+.pet-status-bubble::after {
+  content: '';
+  position: absolute;
+  left: 12%;
+  bottom: -10px;
+  width: 18px;
+  height: 18px;
+  background: #f3e8ff;
+  clip-path: polygon(0 0, 100% 0, 25% 100%);
+  transform: rotate(14deg);
 }
 
 /* Прогресс-бары */

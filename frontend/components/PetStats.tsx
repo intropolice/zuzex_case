@@ -54,7 +54,7 @@ export function PetStats({ pet }: PetStatsProps) {
   };
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 justify-items-center">
+    <div className="flex flex-col gap-2 items-end">
       {stats.map((stat) => {
         const Icon = stat.icon;
         const percentage = Math.min(Math.max(stat.value, 0), 100);
@@ -65,24 +65,24 @@ export function PetStats({ pet }: PetStatsProps) {
             key={stat.label}
             type="button"
             onClick={() => router.push(stat.href)}
-            className="flex flex-col items-center gap-2 focus:outline-none"
+            className="main-menu-stat-btn flex flex-col items-center gap-1 focus:outline-none"
             aria-label={`Перейти в локацию для показателя "${stat.label}"`}
             title={`Открыть локацию: ${stat.label}`}
           >
             <div
-              className="w-20 h-20 rounded-full flex items-center justify-center shadow-sm transition-transform duration-200 hover:scale-105"
+              className="w-16 h-16 rounded-full flex items-center justify-center shadow-sm transition-transform duration-200 hover:scale-105"
               style={{
                 background: `conic-gradient(${color} ${percentage * 3.6}deg, #e5e7eb 0deg)`,
               }}
             >
-              <div className="w-14 h-14 rounded-full bg-white flex flex-col items-center justify-center">
-                <Icon size={14} style={{ color }} />
-                <span className="text-[11px] font-semibold text-gray-700 leading-none mt-1">
+              <div className="w-11 h-11 rounded-full bg-white flex flex-col items-center justify-center">
+                <Icon size={12} style={{ color }} />
+                <span className="text-[10px] font-semibold text-gray-700 leading-none mt-0.5">
                   {percentage}
                 </span>
               </div>
             </div>
-            <span className="text-xs font-semibold text-gray-700">
+            <span className="text-[10px] font-semibold text-gray-700">
               {stat.label}
             </span>
           </button>

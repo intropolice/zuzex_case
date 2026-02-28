@@ -4,14 +4,16 @@ import Link from 'next/link';
 import { Home } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { petAPI } from '@/lib/api';
+import { LocationPetDisplay } from '@/components/LocationPetDisplay';
+import { GlobalCoinsOverlay } from '@/components/GlobalCoinsOverlay';
 
 export default function GamesLocationPage() {
   const [progress, setProgress] = useState(50);
 
   const routeButtons = [
-    { label: 'Игра1', href: '/locations/games/game1' },
-    { label: 'Игра2', href: '/locations/games/game2' },
-    { label: 'Игра3', href: '/locations/games/game3' },
+    { label: 'Google Dinosaur', href: '/locations/games/game1' },
+    { label: 'FlappyBird', href: '/locations/games/game2' },
+    { label: 'Tetris', href: '/locations/games/game3' },
   ];
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export default function GamesLocationPage() {
 
       <div className="relative z-10 w-full max-w-lg">
         <div className="pet-card relative overflow-hidden p-8 md:p-10 min-h-[620px] md:min-h-[700px] flex flex-col justify-between">
+          <GlobalCoinsOverlay />
           <div
             className="absolute inset-0"
             style={{
@@ -64,7 +67,7 @@ export default function GamesLocationPage() {
 
           <Link
             href="/"
-            className="absolute top-4 left-4 z-20 inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-200/70 border border-gray-300 text-gray-700 hover:bg-gray-200 transition-colors"
+            className="liquid-glass-btn absolute top-4 left-4 z-20 inline-flex items-center justify-center w-12 h-12 rounded-full border border-white/45 bg-white/18 text-white backdrop-blur-xl shadow-[0_10px_28px_rgba(56,189,248,0.25),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/28 transition-all duration-300"
             aria-label="Вернуться к питомцу"
             title="Вернуться к питомцу"
           >
@@ -96,12 +99,17 @@ export default function GamesLocationPage() {
                 <Link
                   key={btn.label}
                   href={btn.href}
-                  className="text-center rounded-xl px-5 py-3 font-bold text-white border border-fuchsia-300/60 bg-violet-700 hover:bg-violet-600 transition-colors"
+                  className="liquid-glass-btn relative overflow-hidden text-center rounded-2xl px-5 py-3 font-bold text-white border border-white/40 bg-white/15 backdrop-blur-xl shadow-[0_8px_30px_rgba(236,72,153,0.28),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/25 hover:border-white/60 transition-all duration-300"
                 >
+                  <span className="pointer-events-none absolute inset-x-4 top-1 h-4 rounded-full bg-white/35 blur-sm" />
                   {btn.label}
                 </Link>
               ))}
             </div>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 z-0 flex justify-center pointer-events-none">
+            <LocationPetDisplay />
           </div>
         </div>
       </div>

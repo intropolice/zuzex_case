@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { Home } from 'lucide-react';
 import { petAPI } from '@/lib/api';
+import { addGameCoins } from '@/lib/game-coins';
+import { GameCoinsBar } from '@/components/GameCoinsBar';
 
 type Obstacle = { x: number; width: number; height: number };
 
@@ -102,19 +104,31 @@ export default function Game1Page() {
           if (obstacles[i].x + obstacles[i].width < 0) {
             obstacles.splice(i, 1);
             frameScore += 1;
+            addGameCoins(1);
             if (frameScore % 5 === 0) speed += 0.3;
             setScore(frameScore);
           }
         }
       }
 
-      ctx.fillStyle = '#18181b';
-      ctx.fillRect(dino.x, dino.y, dino.w, dino.h);
+      // Blocky dinosaur model
+      ctx.fillStyle = '#065f46';
+      ctx.fillRect(dino.x + 8, dino.y + 10, 18, 20); // body
+      ctx.fillRect(dino.x + 16, dino.y, 12, 12); // head
+      ctx.fillRect(dino.x + 8, dino.y + 30, 6, 12); // left leg
+      ctx.fillRect(dino.x + 20, dino.y + 30, 6, 12); // right leg
+      ctx.fillStyle = '#a7f3d0';
+      ctx.fillRect(dino.x + 23, dino.y + 4, 3, 3); // eye
 
-      ctx.fillStyle = '#3f3f46';
+      ctx.fillStyle = '#15803d';
       obstacles.forEach((o) => {
         const oy = GROUND_Y - o.height;
-        ctx.fillRect(o.x, oy, o.width, o.height);
+        // Cactus-like primitive obstacle
+        const trunkW = Math.max(10, Math.floor(o.width * 0.6));
+        const armW = Math.max(4, Math.floor(o.width * 0.25));
+        ctx.fillRect(o.x, oy, trunkW, o.height);
+        ctx.fillRect(o.x - armW + 1, oy + Math.floor(o.height * 0.45), armW, Math.max(8, Math.floor(o.height * 0.22)));
+        ctx.fillRect(o.x + trunkW - 1, oy + Math.floor(o.height * 0.28), armW, Math.max(8, Math.floor(o.height * 0.2)));
 
         const hit =
           dino.x < o.x + o.width &&
@@ -157,35 +171,47 @@ export default function Game1Page() {
     <main className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <div className="floating-shapes"><div></div><div></div><div></div><div></div></div>
       <div className="relative z-10 w-full max-w-4xl">
-        <div className="pet-card p-6 md:p-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="pet-card relative overflow-hidden p-6 md:p-8">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: "url('/images/main_bg1.jpg')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+          <div className="relative z-10 flex items-center justify-between mb-4">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Dino Runner (TS)</h1>
-            <Link href="/locations/games" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 transition-colors">
-              <Home size={16} />
-              Назад
-            </Link>
+            <div className="flex items-center gap-2">
+              <GameCoinsBar />
+              <Link href="/locations/games" className="liquid-glass-btn inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/45 bg-white/16 text-white backdrop-blur-xl shadow-[0_10px_26px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/26 transition-all duration-300">
+                <Home size={16} />
+                Назад
+              </Link>
+            </div>
           </div>
-          <div className="mb-4 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
+          <div className="relative z-10 mb-4 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
             <p className="text-white text-sm md:text-base">
               Правила: избегай препятствий, прыгай на пробел/стрелку вверх или кликом по полю.
               Чем дольше бежишь, тем выше счёт.
             </p>
           </div>
-          <div className="relative">
+          <div className="relative z-10">
             <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} className="w-full rounded-xl bg-white border border-gray-300" />
             {!running && (
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-6">
                 <button
                   type="button"
                   onClick={() => window.location.reload()}
-                  className="inline-flex px-5 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors"
+                  className="inline-flex px-5 py-3 rounded-xl border border-white/45 bg-white/16 text-white font-semibold backdrop-blur-xl shadow-[0_10px_26px_rgba(59,130,246,0.25),inset_0_1px_0_rgba(255,255,255,0.45)] hover:bg-white/26 transition-all duration-300"
                 >
                   Попробовать еще раз
                 </button>
               </div>
             )}
           </div>
-          <div className="mt-3 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
+          <div className="relative z-10 mt-3 rounded-xl bg-black/85 border border-white/20 px-4 py-3">
             <p className="text-white font-semibold">Счёт: {score} {running ? '' : '(забег завершён)'}</p>
           </div>
         </div>

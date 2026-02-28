@@ -5,10 +5,14 @@ import { petAPI } from '@/lib/api';
 import { triggerLaughAnimation } from '@/lib/pet-animation';
 import Link from 'next/link';
 import { Home } from 'lucide-react';
+import { LocationPetDisplay } from '@/components/LocationPetDisplay';
+import { GameCoinsBar } from '@/components/GameCoinsBar';
+import { spendGameCoins } from '@/lib/game-coins';
 
 export default function ClinicLocationPage() {
   const [health, setHealth] = useState(60);
   const [loading, setLoading] = useState(false);
+  const [showNoMoneyBanner, setShowNoMoneyBanner] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -41,6 +45,15 @@ export default function ClinicLocationPage() {
   }, [health]);
 
   const handleTreatment = async () => {
+    const paid = spendGameCoins(25);
+    if (!paid) {
+      setShowNoMoneyBanner(true);
+      window.setTimeout(() => {
+        setShowNoMoneyBanner(false);
+      }, 1000);
+      return;
+    }
+
     setLoading(true);
     const previousHealth = health;
     try {
@@ -74,32 +87,41 @@ export default function ClinicLocationPage() {
             backgroundRepeat: 'no-repeat',
           }}
         >
-          <Link
-            href="/"
-            className="absolute top-6 left-6 z-20 inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/45 border border-white/30 text-white hover:bg-black/60 transition-colors shadow-lg backdrop-blur-sm"
-            aria-label="На главную"
-            title="На главную"
-          >
-            <Home size={18} />
-          </Link>
+          <div className="absolute top-6 left-6 right-6 z-20 flex items-start gap-3">
+            <Link
+              href="/"
+              className="liquid-glass-btn inline-flex items-center justify-center w-11 h-11 rounded-full bg-black/45 border border-white/30 text-white hover:bg-black/60 transition-colors shadow-lg backdrop-blur-sm shrink-0"
+              aria-label="На главную"
+              title="На главную"
+            >
+              <Home size={18} />
+            </Link>
 
-          <div className="absolute inset-x-6 top-20 rounded-2xl bg-black/45 border border-white/20 p-4 backdrop-blur-sm">
-            <h1 className="text-center text-2xl font-bold text-white mb-3">Клиника</h1>
-            <div className="flex items-center justify-between mb-2 text-white font-semibold">
-              <span>Здоровье</span>
-              <span>{health}%</span>
+            <div className="flex-1 rounded-xl bg-black/45 border border-white/20 p-3 backdrop-blur-sm">
+              <div className="flex items-center justify-between mb-2 text-white font-semibold">
+                <span>Здоровье</span>
+                <span>{health}%</span>
+              </div>
+              <div className="h-2.5 rounded-full bg-black/35 overflow-hidden">
+                <div
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${health}%`,
+                    background: 'linear-gradient(90deg, #ef4444 0%, #f97316 45%, #22c55e 100%)',
+                  }}
+                />
+              </div>
+              <p className="mt-2 text-sm text-white font-semibold">{diagnosis}</p>
             </div>
-            <div className="h-3 rounded-full bg-black/35 overflow-hidden">
-              <div
-                className="h-full transition-all duration-500"
-                style={{
-                  width: `${health}%`,
-                  background: 'linear-gradient(90deg, #ef4444 0%, #f97316 45%, #22c55e 100%)',
-                }}
-              />
-            </div>
-            <p className="mt-3 text-center text-white font-semibold">{diagnosis}</p>
+
+            <GameCoinsBar className="shrink-0" />
           </div>
+
+          {showNoMoneyBanner && (
+            <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30 rounded-xl bg-red-600/90 text-white px-4 py-2 font-semibold">
+              Недостаточно монет
+            </div>
+          )}
 
           <div className="absolute inset-x-0 bottom-8 z-20 flex justify-center">
             <button
@@ -108,8 +130,12 @@ export default function ClinicLocationPage() {
               disabled={loading}
               className="inline-flex items-center justify-center px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Лечение...' : 'Начать лечение'}
+              {loading ? 'Лечение...' : 'Начать лечение (25 монет)'}
             </button>
+          </div>
+
+          <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center pointer-events-none">
+            <LocationPetDisplay />
           </div>
         </div>
       </div>

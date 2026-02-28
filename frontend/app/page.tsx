@@ -3,6 +3,7 @@
 import React from 'react';
 import { GameProvider, useGame } from '@/context/GameContext';
 import { GameDashboard } from '@/components/GameDashboard';
+import { GlobalCoinsOverlay } from '@/components/GlobalCoinsOverlay';
 import { PetCreationForm } from '@/components/PetCreationForm';
 
 function HomeContent() {
@@ -11,7 +12,10 @@ function HomeContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="white-card px-6 py-4 text-gray-700 font-semibold">Загрузка питомца...</div>
+        <div className="white-card relative px-6 py-4 text-gray-700 font-semibold">
+          <GlobalCoinsOverlay />
+          Загрузка питомца...
+        </div>
       </div>
     );
   }
